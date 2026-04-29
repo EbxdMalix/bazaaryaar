@@ -10,12 +10,17 @@ interface StoreState {
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  compareList: Product[];
+  addToCompare: (product: Product) => void;
+  removeFromCompare: (productId: string) => void;
+  clearCompare: () => void;
 }
 
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       cart: [],
+      // ... cart actions
       addToCart: (product) => {
         const currentCart = get().cart;
         const existingItem = currentCart.find((item) => item.id === product.id);
@@ -49,6 +54,20 @@ export const useStore = create<StoreState>()(
       clearCart: () => set({ cart: [] }),
       getTotalItems: () => get().cart.reduce((total, item) => total + item.quantity, 0),
       getTotalPrice: () => get().cart.reduce((total, item) => total + item.price * item.quantity, 0),
+      
+      // Comparison
+      compareList: [],
+      addToCompare: (product) => {
+        const currentList = get().compareList;
+        if (currentList.length >= 4) return;
+        if (!currentList.some(p => p.id === product.id)) {
+          set({ compareList: [...currentList, product] });
+        }
+      },
+      removeFromCompare: (productId) => {
+        set({ compareList: get().compareList.filter(p => p.id !== productId) });
+      },
+      clearCompare: () => set({ compareList: [] }),
     }),
     {
       name: 'bazaaryard-storage',

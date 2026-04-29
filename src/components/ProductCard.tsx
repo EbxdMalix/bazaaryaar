@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, Heart } from 'lucide-react';
+import { ShoppingCart, Star, Heart, Repeat } from 'lucide-react';
 import { Product } from '../types';
 import { formatPrice } from '../utils/utils';
 import { useStore } from '../hooks/useStore';
@@ -13,6 +13,9 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const addToCart = useStore((state) => state.addToCart);
+  const { compareList, addToCompare, removeFromCompare } = useStore();
+  
+  const isComparing = compareList.some(p => p.id === product.id);
 
   const handleAddToCart = (e: any) => {
     e.preventDefault();
@@ -22,6 +25,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       description: 'You can view your cart to checkout.',
       style: { background: '#0A1533', color: '#fff' }
     });
+  };
+
+  const handleCompare = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isComparing) {
+      removeFromCompare(product.id);
+      toast.info(`Removed ${product.name} from comparison`);
+    } else {
+      if (compareList.length >= 4) {
+        toast.error('You can only compare up to 4 products');
+        return;
+      }
+      addToCompare(product);
+      toast.success(`Added ${product.name} to comparison list`);
+    }
   };
 
   return (
@@ -41,9 +60,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             -{product.discount}% OFF
           </div>
         )}
-        <button className="absolute top-4 right-4 p-2.5 bg-white/60 backdrop-blur-md rounded-xl text-gray-400 hover:text-red-500 transition-all transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
-          <Heart size={18} />
-        </button>
+        <div className="absolute top-4 right-4 flex flex-col gap-2 transition-all transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100">
+          <button className="p-2.5 bg-white/60 backdrop-blur-md rounded-xl text-gray-400 hover:text-red-500 transition-all">
+            <Heart size={18} />
+          </button>
+          <button 
+            onClick={handleCompare}
+            className={`p-2.5 bg-white/60 backdrop-blur-md rounded-xl transition-all ${isComparing ? 'text-brand-gold bg-brand-blue/10 shadow-inner' : 'text-gray-400 hover:text-brand-gold'}`}
+            title="Compare Product"
+          >
+            <Repeat size={18} />
+          </button>
+        </div>
       </Link>
 
       <div className="flex flex-col flex-1">

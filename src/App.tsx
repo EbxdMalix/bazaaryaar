@@ -15,6 +15,8 @@ import ProductListing from './pages/ProductListing';
 import ProductDetail from './pages/ProductDetail';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import Compare from './pages/Compare';
+import { ComparisonFloater } from './components/ComparisonFloater';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -39,9 +41,11 @@ export default function App() {
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/compare" element={<Compare />} />
           </Routes>
         </main>
         <Footer />
+        <ComparisonFloater />
         <Toaster position="bottom-right" expand={false} richColors />
       </div>
     </Router>

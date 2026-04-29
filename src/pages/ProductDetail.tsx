@@ -3,14 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { products } from '../data/mockData';
 import { useStore } from '../hooks/useStore';
 import { formatPrice, cn } from '../utils/utils';
-import { Star, Shield, Truck, RefreshCcw, ShoppingCart, CreditCard, ChevronRight, Share2, HelpCircle, Heart } from 'lucide-react';
+import { Star, Shield, Truck, RefreshCcw, ShoppingCart, CreditCard, ChevronRight, Share2, HelpCircle, Heart, Repeat } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const product = products.find((p) => p.id === id);
-  const addToCart = useStore((state) => state.addToCart);
+  const { addToCart, compareList, addToCompare, removeFromCompare } = useStore();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('description');
 
@@ -136,7 +136,29 @@ export default function ProductDetail() {
                 Secure Checkout
               </button>
               <button 
-                className="p-5 bg-brand-blue text-brand-gold rounded-2xl hover:bg-white border border-brand-blue transition-all group"
+                onClick={() => {
+                  if (compareList.some(p => p.id === product.id)) {
+                    removeFromCompare(product.id);
+                  } else {
+                    if (compareList.length >= 4) {
+                      toast.error('Compare list full');
+                      return;
+                    }
+                    addToCompare(product);
+                  }
+                }}
+                className={cn(
+                  "p-5 rounded-2xl border transition-all group",
+                  compareList.some(p => p.id === product.id) 
+                    ? "bg-brand-gold border-brand-gold text-brand-blue" 
+                    : "bg-brand-blue text-brand-gold border-brand-blue hover:bg-white"
+                )}
+                title="Compare Product"
+              >
+                <Repeat size={22} className="group-hover:rotate-12 transition-transform" />
+              </button>
+              <button 
+                className="p-5 bg-brand-light text-brand-blue rounded-2xl hover:bg-white border border-gray-100 transition-all group"
               >
                 <HelpCircle size={22} className="group-hover:rotate-12 transition-transform" />
               </button>

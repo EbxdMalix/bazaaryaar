@@ -85,7 +85,7 @@ export default function Home() {
               className="bg-white rounded-3xl p-6 flex flex-col items-center gap-4 shadow-premium border border-gray-100 hover:border-brand-gold hover:shadow-hover transition-all group"
             >
               <div className="w-16 h-16 bg-brand-light rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
-                {cat.id === 'mobiles' ? '📱' : cat.id === 'laptops' ? '💻' : cat.id === 'audio' ? '🎧' : cat.id === 'watches' ? '⌚' : '⚡'}
+                {cat.id === 'mobiles' ? '📱' : cat.id === 'laptops' ? '💻' : cat.id === 'audio' ? '🎧' : cat.id === 'watches' ? '⌚' : cat.id === 'gaming' ? '🎮' : '⚡'}
               </div>
               <span className="font-display font-black text-xs uppercase tracking-[0.1em] text-brand-blue">{cat.name}</span>
             </Link>

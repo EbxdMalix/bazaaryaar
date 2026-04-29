@@ -52,6 +52,14 @@
   animation-play-state: paused;
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Smooth transitions */
 * {
   @apply duration-300 ease-out;
