@@ -1,16 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, Phone, Heart } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, Phone, Heart, ChevronRight } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { cn } from '../utils/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { products } from '../data/mockData';
+import { Product } from '../types';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<Product[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const cartItemsCount = useStore((state) => state.getTotalItems());
   const navigate = useNavigate();
+  const searchRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,12 +25,44 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim().length > 1) {
+      const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 5);
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, [searchQuery]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/products?search=${searchQuery}`);
       setIsMobileMenuOpen(false);
+      setShowSuggestions(false);
     }
+  };
+
+  const navigateToProduct = (product: Product) => {
+    navigate(`/product/${product.id}`);
+    setSearchQuery('');
+    setShowSuggestions(false);
   };
 
   return (
@@ -66,6 +103,7 @@ export default function Navbar() {
 
           {/* Search Bar - Desktop */}
           <form 
+            ref={searchRef}
             onSubmit={handleSearch}
             className="hidden md:flex flex-1 max-w-lg mx-12 relative group"
           >
@@ -75,10 +113,52 @@ export default function Navbar() {
               className="w-full bg-brand-light border-transparent focus:bg-white focus:ring-4 focus:ring-brand-gold/10 rounded-2xl py-3 px-6 text-sm transition-all outline-none font-medium text-brand-blue placeholder:text-gray-400"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => searchQuery.trim().length > 1 && setShowSuggestions(true)}
             />
             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-brand-gold transition-colors">
               <Search size={18} />
             </div>
+
+            {/* Desktop Suggestions Dropdown */}
+            <AnimatePresence>
+              {showSuggestions && suggestions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[60]"
+                >
+                  <div className="p-2">
+                    {suggestions.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => navigateToProduct(p)}
+                        className="w-full flex items-center gap-4 p-3 hover:bg-brand-light rounded-xl transition-all group/item text-left"
+                      >
+                        <div className="w-12 h-12 bg-white border border-gray-100 rounded-lg flex-shrink-0 p-1 flex items-center justify-center">
+                          <img src={p.image} className="w-full h-full object-contain mix-blend-multiply" alt={p.name} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-black text-brand-gold uppercase tracking-widest">{p.brand}</span>
+                            <span className="px-1.5 py-0.5 bg-brand-blue/5 text-brand-blue/60 text-[9px] font-bold rounded capitalize">{p.category}</span>
+                          </div>
+                          <p className="text-sm font-bold text-brand-blue truncate group-hover/item:text-brand-gold transition-colors">{p.name}</p>
+                        </div>
+                        <ChevronRight size={16} className="text-gray-300 group-hover/item:translate-x-1 group-hover/item:text-brand-gold transition-all" />
+                      </button>
+                    ))}
+                    <button
+                      type="submit"
+                      className="w-full p-3 text-center text-[10px] font-black text-brand-blue/40 uppercase tracking-widest hover:text-brand-gold transition-colors bg-brand-light/30 mt-1"
+                    >
+                      See all results for "{searchQuery}"
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </form>
 
           {/* Nav Actions */}
@@ -111,7 +191,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile Search - Only on desktop scroll or small screens */}
+      {/* Scrolled Mobile Bar */}
       {isScrolled && (
         <div className="md:hidden bg-white px-4 py-2 border-b">
            <form onSubmit={handleSearch} className="relative">
