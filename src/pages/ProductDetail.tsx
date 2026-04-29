@@ -236,12 +236,97 @@ export default function ProductDetail() {
               </div>
             )}
             {activeTab === 'reviews' && (
-              <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-                 <div className="flex items-center gap-1 mb-4">
-                    {[1, 2, 3, 4, 5].map(i => <Star key={i} fill={i <= 4 ? "currentColor" : "none"} className="text-brand-gold" size={20} />)}
-                 </div>
-                 <p className="font-medium text-brand-blue">Displaying {product.reviews} reviews from verified buyers.</p>
-                 <button className="text-brand-gold font-black uppercase tracking-widest text-[10px] hover:underline underline-offset-8">Write a Review</button>
+              <div className="py-8 space-y-12">
+                {/* Review Header & Summary */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-white p-8 rounded-card border border-gray-100 shadow-premium">
+                  <div>
+                    <h3 className="text-2xl font-display font-black text-brand-blue uppercase italic tracking-tighter mb-4">Customer Satisfaction</h3>
+                    <div className="flex items-center gap-6">
+                       <div className="text-5xl font-display font-black text-brand-blue italic">{product.rating}</div>
+                       <div className="space-y-1">
+                          <div className="flex items-center gap-1">
+                             {[1, 2, 3, 4, 5].map(i => (
+                               <Star key={i} size={16} fill={i <= Math.floor(product.rating) ? "#CBB26A" : "none"} className={i <= Math.floor(product.rating) ? "text-brand-gold" : "text-gray-200"} />
+                             ))}
+                          </div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Based on {product.reviews} Verified Reviews</p>
+                       </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                     {[5, 4, 3, 2, 1].map((stars) => (
+                       <div key={stars} className="flex items-center gap-4">
+                          <span className="text-[10px] font-black text-gray-400 w-4">{stars}</span>
+                          <div className="flex-1 h-2 bg-brand-light rounded-full overflow-hidden">
+                             <motion.div 
+                               initial={{ width: 0 }}
+                               animate={{ width: `${stars === 5 ? 75 : stars === 4 ? 15 : 2}%` }}
+                               className="h-full bg-brand-gold"
+                             />
+                          </div>
+                          <span className="text-[10px] font-black text-brand-blue w-6">{stars === 5 ? '75%' : stars === 4 ? '15%' : '2%'}</span>
+                       </div>
+                     ))}
+                  </div>
+                </div>
+
+                {/* Review List */}
+                <div className="space-y-8">
+                   <h3 className="text-xl font-display font-black text-brand-blue uppercase italic tracking-tighter">Recent Appraisals</h3>
+                   <div className="divide-y divide-gray-100">
+                      {[
+                        { name: "Ahmed K.", date: "2 days ago", rating: 5, comment: "Absolutely stunning quality. The titanium finish is even better in person. Nationwide delivery was fast!" },
+                        { name: "Sara M.", date: "1 week ago", rating: 4, comment: "Great product, but the packing could be slightly more premium for such an expensive item. Overall very satisfied." }
+                      ].map((rev, i) => (
+                        <div key={i} className="py-6 space-y-3">
+                           <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                 <span className="text-sm font-black text-brand-blue">{rev.name}</span>
+                                 <span className="text-[9px] font-black bg-green-50 text-green-600 px-1.5 py-0.5 rounded uppercase tracking-tighter">Verified Buyer</span>
+                              </div>
+                              <span className="text-[10px] font-bold text-gray-300 uppercase">{rev.date}</span>
+                           </div>
+                           <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map(s => <Star key={s} size={10} fill={s <= rev.rating ? "currentColor" : "none"} className={s <= rev.rating ? "text-brand-gold" : "text-gray-100"} />)}
+                           </div>
+                           <p className="text-sm text-gray-500 leading-relaxed">{rev.comment}</p>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+
+                {/* Review Form */}
+                <div className="bg-brand-blue rounded-card p-10 text-white relative overflow-hidden">
+                   <div className="relative z-10">
+                      <h3 className="text-2xl font-display font-black text-brand-gold uppercase italic tracking-tighter mb-2">Share Your Experience</h3>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-8">Your feedback fuels our innovation.</p>
+                      
+                      <div className="space-y-6 max-w-xl">
+                         <div className="space-y-3">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-white/60">Your Merit Rating</label>
+                            <div className="flex items-center gap-4">
+                               {[1, 2, 3, 4, 5].map(i => (
+                                 <button key={i} className="hover:scale-125 transition-transform">
+                                   <Star size={24} className="text-brand-gold" />
+                                 </button>
+                               ))}
+                            </div>
+                         </div>
+                         <div className="space-y-3">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-white/60">Detailed Merits</label>
+                            <textarea 
+                              placeholder="Tell us what impressed you or where we can improve..."
+                              className="w-full bg-white/10 border border-white/20 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-brand-gold/10 min-h-[120px] placeholder:text-white/20"
+                            />
+                         </div>
+                         <button className="bg-brand-gold text-brand-blue font-black px-10 py-4 rounded-2xl hover:bg-white transition-all shadow-xl shadow-brand-gold/10 text-xs uppercase tracking-widest">
+                           SUBMIT REVIEW
+                         </button>
+                      </div>
+                   </div>
+                   <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold opacity-5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+                </div>
               </div>
             )}
          </div>
